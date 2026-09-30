@@ -1,0 +1,16 @@
+# Working subtitle files in the repo root — never committed (copyright).
+# Test fixtures under samples/ are tracked explicitly.
+/*.srt
+*.srt.bak
+
+# Agent temp files (workspace rule: .agent-tmp/<task>/)
+.agent-tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
