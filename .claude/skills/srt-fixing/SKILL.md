@@ -71,5 +71,5 @@ yükleme yöntemi anlamına gelir. Detaylar `references/verification.md` sonunda
 3. Gidiş-dönüş doğrulaması (orijinal çözülen metin == çıktı metni) olmadan
    "düzeltildi" denmez.
 4. Kullanıcının ekranda görsel onayı alınmadan iş kapatılmaz.
-5. Çalışma dosyaları repoya commit edilmez (`/*.srt` gitignore'dur);
-   `samples/` altındaki regresyon fixture'ları hariç.
+5. Altyazı içerikleri repoya commit edilmez (`/*.srt`, `samples/` gitignore);
+   regresyon fixture'ları yalnız yerel diskte tutulur.

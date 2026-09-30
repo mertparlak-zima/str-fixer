@@ -18,12 +18,7 @@ director's cut → theatrical re-sync — hepsi kullanıcı testi PASS).
 ├── .gitignore                       # kök/input/output .srt'ler hariç tutulur
 ├── input/                           # kullanıcı bozuk/kaymış dosyaları buraya atar (ignore)
 ├── output/                          # düzeltilmiş çıktılar (ignore)
-├── samples/                         # regresyon fixture'ları (yerel test, push edilmez)
-│   ├── terminator2-fgt.iso8859-9.srt           # vaka 1: bozuk kodlama girdisi
-│   ├── terminator2-fgt.utf8.fixed.srt          # vaka 1: beklenen çıktı
-│   ├── t2-4k-theatrical.en.reference.srt       # vaka 2: referans (doğru zamanlar)
-│   ├── t2-directors-cut.tr.desynced.srt        # vaka 2: kaymış TR girdisi
-│   └── t2-directors-cut.tr.resynced.expected.srt  # vaka 2: beklenen çıktı
+├── samples/                         # YEREL regresyon fixture'ları (gitignore — push edilmez)
 ├── scripts/
 │   ├── extract_pgs.py               # MKV/MP4 gömülü altyazı + PGS OCR
 │   ├── fix_srt.py                   # kodlama teşhisi + yerinde düzeltme
@@ -96,9 +91,10 @@ sürükleyip** test et.
    okuyarak) zorunludur, sapma varsa `--cal` kalibrasyonu.
 8. Gidiş-dönüş/süpürme doğrulaması ve kullanıcı görsel onayı olmadan iş
    kapatılmaz.
-9. Çalışma altyazıları (`input/`, `output/`, kök) repoya commit edilmez;
-   `samples/` fixture'ları yerel regresyon içindir, repo hiçbir zaman
-   altyazı içeriğiyle push edilmez.
+9. Altyazı içerikleri repoya **asla** commit edilmez (`input/`, `output/`,
+   `samples/`, kök — hepsi gitignore). Regresyon fixture'ları yalnız yerel
+   diskte tutulur; repo GitHub'da yalnız kural seti + script + doküman
+   içerir.
 
 ## Arka plan
 

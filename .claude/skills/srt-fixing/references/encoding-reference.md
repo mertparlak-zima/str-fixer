@@ -113,9 +113,9 @@ edilemez ve çözüm otomatik olarak `cp1252` fallback'ine düşer; bu sıra
 
 ## Vaka kanıtı (doğrulanmış örnek)
 
-`samples/terminator2-fgt.iso8859-9.srt` — 74.117 bayt, 1.054 blok:
-yüksek bayt dağılımı `0xFD × 1078, 0xFE × 342, 0xF0 × 261, 0xFC × 363 …`
-tam Türkçe imza profili; 0x80–0x9F boş, 0xC3 yok (mojibake katmanı yok).
-`cp1254` decode → UTF-8 yaz; gidiş-dönüş birebir. Beklenen çıktı:
-`samples/terminator2-fgt.utf8.fixed.srt` (regresyon testinde bayt bayt
-eşleşmeli).
+Terminator 2 FGT (yerel fixture: `samples/terminator2-fgt.*.srt`, gitignore)
+— 74.117 bayt, 1.054 blok: yüksek bayt dağılımı
+`0xFD × 1078, 0xFE × 342, 0xF0 × 261, 0xFC × 363 …` tam Türkçe imza
+profili; 0x80–0x9F boş, 0xC3 yok (mojibake katmanı yok). `cp1254` decode →
+UTF-8 yaz; gidiş-dönüş birebir. Regresyon: fixture çifti arasında
+`fix_srt.py` çıktısı bayt bayt eşleşmeli.

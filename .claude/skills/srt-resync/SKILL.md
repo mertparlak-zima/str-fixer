@@ -51,8 +51,9 @@ böl (aynı kural script'in otomatik segmentleri için de geçerli).
 kullanıcının hedef videoda görsel testi.
 
 ### 6. Teslim + arşiv
-Çıktı `output/`'ta kalır. Vaka yeni bir sorun tipi öğrettiyse
-`samples/`'a fixture + `algorithm.md`'ye ders olarak eklenir.
+Çıktı `output/`'ta kalır. Vaka yeni bir sorun tipi öğrettiyse yerel
+`samples/` klasörüne fixture (gitignore — repoya girmez) +
+`algorithm.md`'ye ders olarak eklenir.
 
 ## Yasaklar
 
@@ -65,5 +66,5 @@ kullanıcının hedef videoda görsel testi.
    çıkarılması.
 4. Çok az anchor (<5) varsa alignment başarısızdır — referans/desynced
    gerçekten aynı film mi, kontrol edilmeden çıktı verilmez.
-5. `input/` ve `output/` dosyaları repoya commit edilmez; yalnız `samples/`
-   fixture'ları.
+5. Altyazı içerikleri (`input/`, `output/`, `samples/`) repoya commit
+   edilmez — fixture'lar yalnız yerel diskte.
