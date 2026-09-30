@@ -3,6 +3,10 @@
 /*.srt
 *.srt.bak
 
+# User drop folders: broken inputs and fixed/resynced results
+input/
+output/
+
 # Agent temp files (workspace rule: .agent-tmp/<task>/)
 .agent-tmp/
 

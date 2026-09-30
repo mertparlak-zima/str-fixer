@@ -1,51 +1,65 @@
 # str-fixer — Bozuk Türkçe SRT Düzeltici
 
-Sık gelen Türkiye içerikli `.srt` altyazılarındaki karakter bozulmalarını
-teşhis edip **BOM'suz UTF-8**'e çeviren kural seti, script ve doğrulama
-checklist'i. Amaç: her seferinde AI'a durumu anlatmak yerine, bozuk dosyayı
-verip "bu repodaki kurallara göre düzelt" demek.
+Sık gelen Türkiye içerikli `.srt` altyazılarındaki **karakter bozulmalarını**
+teşhis edip BOM'suz UTF-8'e çeviren ve **farklı kurgudan kaynaklanan süre
+kaymalarını** referans altyazıyla düzelten kural seti, script'ler ve
+doğrulama checklist'leri. Amaç: her seferinde AI'a durumu anlatmak yerine,
+bozuk dosyayı verip "bu repodaki kurallara göre düzelt" demek.
 
-Kural seti gerçek bir vakada uçtan uca doğrulandı (Terminator 2 TR altyazısı,
-ISO-8859-9 kaynaklı bozulma → Stremio'da kullanıcı testi, 30 Eylül 2026).
+Her iki akış gerçek vakalarda uçtan uca doğrulandı (Terminator 2, 30 Eylül
+2026: ISO-8859-9 kodlama düzeltmesi + director's cut → theatrical re-sync,
+ikisi de Stremio'da kullanıcı testi PASS).
 
-## Deposu yapısı
+## Depo yapısı
 
 ```
 .
 ├── README.md                        # bu dosya
-├── .gitignore                       # kök .srt'ler ve .agent-tmp hariç tutulur
+├── .gitignore                       # kök/input/output .srt'ler hariç tutulur
+├── input/                           # kullanıcı bozuk/kaymış dosyaları buraya atar (ignore)
+├── output/                          # düzeltilmiş çıktılar (ignore)
 ├── samples/                         # regresyon fixture'ları (yerel test, push edilmez)
-│   ├── terminator2-fgt.iso8859-9.srt    # bozuk gelen orijinal
-│   └── terminator2-fgt.utf8.fixed.srt   # beklenen düzeltilmiş çıktı
+│   ├── terminator2-fgt.iso8859-9.srt           # vaka 1: bozuk kodlama girdisi
+│   ├── terminator2-fgt.utf8.fixed.srt          # vaka 1: beklenen çıktı
+│   ├── t2-4k-theatrical.en.reference.srt       # vaka 2: referans (doğru zamanlar)
+│   ├── t2-directors-cut.tr.desynced.srt        # vaka 2: kaymış TR girdisi
+│   └── t2-directors-cut.tr.resynced.expected.srt  # vaka 2: beklenen çıktı
 ├── scripts/
-│   └── fix_srt.py                   # teşhis + yerinde düzeltme CLI'sı
-└── .claude/skills/srt-fixing/
-    ├── SKILL.md                     # ana skill: iş akışı + yasaklar
-    └── references/
-        ├── encoding-reference.md    # bayt tabloları, karar ağacı, sınır durumları
-        └── verification.md          # teslim öncesi checklist + test kodu
+│   ├── fix_srt.py                   # kodlama teşhisi + yerinde düzeltme
+│   └── resync_srt.py                # referansa göre yeniden zamanlama (+--cal/--audit)
+└── .claude/skills/
+    ├── srt-fixing/                  # kodlama bozulması skill'i
+    │   ├── SKILL.md
+    │   └── references/ (encoding-reference, verification)
+    └── srt-resync/                  # süre kayması skill'i
+        ├── SKILL.md
+        └── references/ (algorithm, verification)
 ```
 
-Claude Code oturumlarında skill otomatik listelenir ve `/srt-fixing` olarak
-çağrılabilir.
+Claude Code oturumlarında skill'ler otomatik listelenir ve `/srt-fixing`,
+`/srt-resync` olarak çağrılabilir.
 
 ## Hızlı başlangıç
 
-```bash
-# önce teşhis (yazmaz)
-python scripts/fix_srt.py BOZUK.srt --check
+**Kodlama bozulması** (ð/ý/þ, Ã¼/Ä± görünüyorsa):
 
-# yerinde düzelt
-python scripts/fix_srt.py BOZUK.srt
+```bash
+python scripts/fix_srt.py input/BOZUK.srt --check   # önce teşhis
+python scripts/fix_srt.py input/BOZUK.srt           # yerinde düzelt
 ```
 
-Script: BOM/UTF-8/mojibake/tek-baytlık tespiti yapar, dönüşümü uygular,
-blok-zaman kodu doğrulaması ve kalıntı kontrolüyle rapor verir. Elle müdahale
-yalnızca sınır durumlarında gerekçelendirilebilir (bkz.
-`references/encoding-reference.md`).
+**Süre kayması** (farklı kurgudan altyazı):
 
-Sonra `references/verification.md`'deki checklist'i koş ve **Stremio'da
-video oynarken sürükleyip** test et.
+```bash
+python scripts/resync_srt.py input/REFERANS_EN.srt input/KAYMIS_TR.srt --audit
+# sapma bulunan bölgeler için metin-doğrulamalı kalibrasyon:
+python scripts/resync_srt.py input/REFERANS_EN.srt input/KAYMIS_TR.srt \
+    --cal 656:671:743.2 --cal 672:753:818.4 --drop 751,752,753
+```
+
+Çıktılar `output/`'a yazılır (BOM'suz UTF-8). Sonra ilgili skill'in
+`references/verification.md` checklist'ini koş ve **Stremio'da video oynarken
+sürükleyip** test et.
 
 ## Kısa kurallar
 
@@ -60,8 +74,14 @@ video oynarken sürükleyip** test et.
    geri çevir (encode CP125x → decode UTF-8).
 5. **Stremio'da srt import edilmez**: video oynarken dosya oynatıcı ekranına
    sürüklenir. "Unsupported file" = yanlış yöntem, dosya hatası değil.
-6. Gidiş-dönüş doğrulaması ve kullanıcı görsel onayı olmadan iş kapatılmaz.
-7. Çalışma altyazıları repoya commit edilmez (`/*.srt` ignore'dur);
+6. Re-sync'te offset **basamaklıdır** (ek sahne = sabit kayma); fps/dişilim
+   farkı sürekli kayma üretir — bu ayrım olmadan düzeltme yapılmaz.
+7. Diyalog-yoğun sahnede otomatik hizalama **zaman-tesadüfüyle
+   zehirlenebilir**; teslimden önce 10dk süpürme denetimi (çiftleri gözle
+   okuyarak) zorunludur, sapma varsa `--cal` kalibrasyonu.
+8. Gidiş-dönüş/süpürme doğrulaması ve kullanıcı görsel onayı olmadan iş
+   kapatılmaz.
+9. Çalışma altyazıları (`input/`, `output/`, kök) repoya commit edilmez;
    `samples/` fixture'ları yerel regresyon içindir, repo hiçbir zaman
    altyazı içeriğiyle push edilmez.
 
