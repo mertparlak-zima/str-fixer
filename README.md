@@ -1,14 +1,14 @@
 # str-fixer — Bozuk Türkçe SRT Düzeltici
 
-Sık gelen Türkiye içerikli `.srt` altyazılarındaki **karakter bozulmalarını**
-teşhis edip BOM'suz UTF-8'e çeviren ve **farklı kurgudan kaynaklanan süre
-kaymalarını** referans altyazıyla düzelten kural seti, script'ler ve
-doğrulama checklist'leri. Amaç: her seferinde AI'a durumu anlatmak yerine,
-bozuk dosyayı verip "bu repodaki kurallara göre düzelt" demek.
+Video dosyasından altyazı **çıkarma** (PGS OCR dahil), sık gelen TR
+altyazılardaki **karakter bozulmalarını** düzeltme ve farklı kurgudan
+kaynaklanan **süre kaymalarını** referansla düzeltme: üç akış, kural setleri,
+script'ler ve doğrulama checklist'leri. Amaç: her seferinde AI'a durumu
+anlatmak yerine, dosyayı verip "bu repodaki kurallara göre düzelt" demek.
 
-Her iki akış gerçek vakalarda uçtan uca doğrulandı (Terminator 2, 30 Eylül
-2026: ISO-8859-9 kodlama düzeltmesi + director's cut → theatrical re-sync,
-ikisi de Stremio'da kullanıcı testi PASS).
+Üç akış da gerçek vakalarda uçtan uca doğrulandı (Terminator 2, 30 Eylül
+2026: MKV içinden PGS → OCR ile EN srt çıkarma; ISO-8859-9 kodlama düzeltmesi;
+director's cut → theatrical re-sync — hepsi kullanıcı testi PASS).
 
 ## Depo yapısı
 
@@ -25,21 +25,32 @@ ikisi de Stremio'da kullanıcı testi PASS).
 │   ├── t2-directors-cut.tr.desynced.srt        # vaka 2: kaymış TR girdisi
 │   └── t2-directors-cut.tr.resynced.expected.srt  # vaka 2: beklenen çıktı
 ├── scripts/
+│   ├── extract_pgs.py               # MKV/MP4 gömülü altyazı + PGS OCR
 │   ├── fix_srt.py                   # kodlama teşhisi + yerinde düzeltme
 │   └── resync_srt.py                # referansa göre yeniden zamanlama (+--cal/--audit)
 └── .claude/skills/
     ├── srt-fixing/                  # kodlama bozulması skill'i
     │   ├── SKILL.md
     │   └── references/ (encoding-reference, verification)
-    └── srt-resync/                  # süre kayması skill'i
+    ├── srt-resync/                  # süre kayması skill'i
+    │   ├── SKILL.md
+    │   └── references/ (algorithm, verification)
+    └── pgs-extract/                 # video içinden altyazı çıkarma skill'i
         ├── SKILL.md
-        └── references/ (algorithm, verification)
+        └── references/ (toolchain, verification)
 ```
 
 Claude Code oturumlarında skill'ler otomatik listelenir ve `/srt-fixing`,
-`/srt-resync` olarak çağrılabilir.
+`/srt-resync`, `/pgs-extract` olarak çağrılabilir.
 
 ## Hızlı başlangıç
+
+**Video'dan altyazı çıkarma** (gömülü PGS/Blu-ray bitmap dahil):
+
+```bash
+python scripts/extract_pgs.py FILM.mkv --list      # track envanteri (elle sayma!)
+python scripts/extract_pgs.py FILM.mkv --lang en   # seç + çıkar + OCR + doğrula
+```
 
 **Kodlama bozulması** (ð/ý/þ, Ã¼/Ä± görünüyorsa):
 
@@ -63,7 +74,11 @@ sürükleyip** test et.
 
 ## Kısa kurallar
 
-1. **Dosya çoğu zaman bozuk değildir, yanlış okunmaktadır** — SRT kodlama
+1. **Videodan altyazı çıkarırken track numarası elle sayılmaz** —
+   `mkvextract` tüm track'ler üzerinden 0'dan sayan mkvmerge id'sini bekler;
+   JSON'dan (`--list`) okunur. Ayrıca dil kodları 3 harf ISO'dur (`tur`),
+   önek eşleşmesi yanlış çalışır (`tur` ≠ `tr` öneki).
+2. **Dosya çoğu zaman bozuk değildir, yanlış okunmaktadır** — SRT kodlama
    metadata'sı taşımaz; teşhis bayt analizinden konur, tahminden değil.
 2. Türkçe imza baytları: `0xD0 Ğ, 0xDD İ, 0xDE Ş, 0xF0 ğ, 0xFD ı, 0xFE ş`
    (ISO-8859-1 okumasında `Ð Ý Þ ð ý þ` görünür). `0xD1/0xD2/0xF1/0xF2`
