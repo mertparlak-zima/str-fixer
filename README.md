@@ -19,10 +19,14 @@ director's cut → theatrical re-sync — hepsi kullanıcı testi PASS).
 ├── input/                           # kullanıcı bozuk/kaymış dosyaları buraya atar (ignore)
 ├── output/                          # düzeltilmiş çıktılar (ignore)
 ├── samples/                         # YEREL regresyon fixture'ları (gitignore — push edilmez)
+├── infra/
+│   └── runner/compose.yml           # yerel self-hosted Docker runner (str-fixer-docker-1)
 ├── scripts/
 │   ├── extract_pgs.py               # MKV/MP4 gömülü altyazı + PGS OCR
 │   ├── fix_srt.py                   # kodlama teşhisi + yerinde düzeltme
-│   └── resync_srt.py                # referansa göre yeniden zamanlama (+--cal/--audit)
+│   ├── resync_srt.py                # referansa göre yeniden zamanlama (+--cal/--audit)
+│   ├── selftest_suite.py            # sentetik kodlama/track regresyon testi (yerel + CI)
+│   └── start-ci-runner.ps1          # yerel Docker runner başlatma ve kayıt script'i
 └── .claude/skills/
     ├── srt-fixing/                  # kodlama bozulması skill'i
     │   ├── SKILL.md

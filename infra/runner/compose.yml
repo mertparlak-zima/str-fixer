@@ -1,0 +1,26 @@
+name: str-fixer-ci
+
+services:
+  runner:
+    image: dt-ci-runner:latest
+    container_name: str-fixer-docker-1
+    restart: unless-stopped
+    environment:
+      REPO_URL: https://github.com/mertparlak-zima/str-fixer
+      RUNNER_NAME: str-fixer-docker-1
+      RUNNER_LABELS: docker,str-fixer
+    entrypoint: ['/bin/bash', '-c']
+    command:
+      - |
+        set -e
+        mkdir -p /home/runner/_work
+        chown -R runner:runner /home/runner/_work
+        chown runner:runner /home/runner
+        cd /home/runner
+        while [ ! -f .runner ]; do sleep 1; done
+        exec gosu runner:runner ./run.sh
+    volumes:
+      - runner-work:/home/runner/_work
+
+volumes:
+  runner-work:

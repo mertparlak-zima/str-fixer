@@ -51,6 +51,7 @@ Read [README](README.md), then the matching skill fully before work.
 Media/subtitles are irreplaceable local state and never committed. Preserve
 encoding/resync/OCR verification and actual-player test rules.
 
+- All CI runs MUST execute on the local self-hosted Docker runner `str-fixer-docker-1` with labels `[self-hosted, linux, x64, docker, str-fixer]` (`infra/runner/compose.yml`, started via `scripts/start-ci-runner.ps1`). GitHub-hosted runners (`ubuntu-latest`, etc.) are forbidden.
 - [srt-fixing](.claude/skills/srt-fixing/SKILL.md)
 - [srt-resync](.claude/skills/srt-resync/SKILL.md)
 - [pgs-extract](.claude/skills/pgs-extract/SKILL.md)
