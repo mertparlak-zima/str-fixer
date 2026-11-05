@@ -1,8 +1,8 @@
 name: ci
 
+# Workspace rule (2026-11-04): validation triggers on pull_request + workflow_dispatch
+# only - no duplicate post-merge push validation on main.
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
